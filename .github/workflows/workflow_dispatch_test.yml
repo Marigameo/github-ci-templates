@@ -1,5 +1,8 @@
 name: Build and Deploy
 
+permissions:
+  contents: write 
+
 on:
   push:
     branches: ["main"]  # Deploy to staging on push to main
@@ -50,7 +53,7 @@ jobs:
 
       - name: Invalidate Staging CloudFront
         run: |
-          echo "Upload to Staging S3..."
+          echo "Invalidate Staging CloudFront..."
           # Add your command here
 
   promote-to-production:
