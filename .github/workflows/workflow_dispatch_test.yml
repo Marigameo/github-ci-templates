@@ -1,0 +1,57 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - release
+  workflow_dispatch:  # Allows manual triggers for production promotion
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: string
+
+jobs:
+  build:
+    name: Build the application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+  deploy-to-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to Staging..."
+          # Add your deployment commands here (e.g., AWS S3 deployment)
+          # aws s3 sync ./build s3://staging-cdn-bucket/
+
+  promote-to-prod:
+    name: Promote to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event.inputs.environment == 'production'
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Promoting Staging to Production..."
+          # Add your deployment commands here (e.g., AWS S3 promotion)
+          # aws s3 sync ./build s3://prod-cdn-bucket/
